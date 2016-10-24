@@ -7,21 +7,9 @@ import (
 
 const testVersion = 2
 
-func isSilence(line string) bool {
-	for _, v := range line {
-		if !unicode.IsSpace(v) {
-			return false
-		}
-	}
-	return true
-}
-
-func isQuestion(line string) bool {
-	line = strings.TrimSpace(line)
-	return line[len(line)-1:] == "?"
-}
-
-func isShouted(line string) bool {
+// Manually iterating over the line is ~3x faster (~2700ns/op to ~9200ns/op)
+// then a compairsion like "line == line.ToUpper && hasAnyLetter(line)"
+func isShouting(line string) bool {
 	var atLeastOneLetter bool
 	for _, v := range line {
 		if unicode.IsLetter(v) {
@@ -36,13 +24,15 @@ func isShouted(line string) bool {
 
 // Hey askes Bob a question.
 func Hey(line string) string {
-	if isSilence(line) {
+	lineTrimmed := strings.TrimSpace(line)
+
+	if len(lineTrimmed) == 0 {
 		return "Fine. Be that way!"
 	}
-	if isShouted(line) {
+	if isShouting(lineTrimmed) {
 		return "Whoa, chill out!"
 	}
-	if isQuestion(line) {
+	if lineTrimmed[len(lineTrimmed)-1:] == "?" {
 		return "Sure."
 	}
 
