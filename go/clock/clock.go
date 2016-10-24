@@ -2,40 +2,36 @@ package clock
 
 import "fmt"
 
-const testVersion = 4
+const (
+	testVersion   = 4
+	minutesPerDay = 24 * 60
+)
 
 // Clock type.
-type Clock struct {
-	hour, minute int
+type Clock int
+
+// NewClock creates a Clock from given minutes
+func NewClock(minutes int) Clock {
+	c := minutes % minutesPerDay
+
+	// "Invert" negative minutes
+	if c < 0 {
+		c += minutesPerDay
+	}
+
+	return Clock(c)
 }
 
-// New creates a Clock from given hour and minute. Negative values are supported
+// New creates a Clock from given hour and minute.
 func New(hour, minute int) Clock {
-
-	// Add or substract hours if minutes "overflow"
-	// works because minute and hour are int
-	hour += minute / 60
-
-	minute %= 60
-	hour %= 24
-
-	// Fix negative values
-	if minute < 0 {
-		minute = 60 + minute
-		hour--
-	}
-	if hour < 0 {
-		hour = 24 + hour
-	}
-
-	return Clock{hour: hour, minute: minute}
+	return NewClock(hour*60 + minute)
 }
 
 func (c Clock) String() string {
-	return fmt.Sprintf("%02d:%02d", c.hour, c.minute)
+	return fmt.Sprintf("%02d:%02d", c/60, c%60)
 }
 
-// Add minutes to a Clock. Negative values are supported.
+// Add minutes to a Clock.
 func (c Clock) Add(minutes int) Clock {
-	return New(c.hour, c.minute+minutes)
+	return NewClock(int(c) + minutes)
 }
