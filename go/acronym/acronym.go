@@ -7,7 +7,7 @@ import (
 
 const testVersion = 1
 
-// wordFieldFunc treads everything that isn't a letter as a field seperator.
+// wordFieldFunc treats everything that isn't a letter as a field seperator.
 func wordFieldFunc(r rune) bool {
 	return !unicode.IsLetter(r)
 }
