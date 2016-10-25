@@ -11,6 +11,5 @@ const (
 
 // AddGigasecond adds 10^9 (1 000 000 000) seconds to a time.
 func AddGigasecond(t time.Time) time.Time {
-	d := time.Second * Gigasecond
-	return t.Add(d)
+	return t.Add(time.Second * Gigasecond)
 }
