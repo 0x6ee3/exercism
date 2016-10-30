@@ -1,21 +1,26 @@
 package strand
 
+import "strings"
+
 const testVersion = 3
+
+func dnaToRna(r rune) rune {
+	if r == 'C' {
+		return 'G'
+	}
+	if r == 'G' {
+		return 'C'
+	}
+	if r == 'T' {
+		return 'A'
+	}
+	if r == 'A' {
+		return 'U'
+	}
+	return r
+}
 
 // ToRNA ..
 func ToRNA(dna string) string {
-	var rna string
-	for _, c := range dna {
-		switch c {
-		case 'C':
-			rna += "G"
-		case 'G':
-			rna += "C"
-		case 'T':
-			rna += "A"
-		case 'A':
-			rna += "U"
-		}
-	}
-	return rna
+	return strings.Map(dnaToRna, dna)
 }
