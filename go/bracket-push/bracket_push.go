@@ -23,10 +23,6 @@ func (bs *BracketStack) Pop() rune {
 	return r[0]
 }
 
-func isOpeningBracket(r rune) bool {
-	return r == '(' || r == '[' || r == '{'
-}
-
 func matchingBrackets(opening, closing rune) bool {
 	return (opening == '(' && closing == ')') ||
 		(opening == '[' && closing == ']') ||
@@ -38,12 +34,10 @@ func Bracket(input string) (bool, error) {
 	stack := new(BracketStack)
 
 	for _, r := range input {
-		if isOpeningBracket(r) {
+		if r == '(' || r == '[' || r == '{' {
 			stack.Push(r)
-		} else {
-			if !matchingBrackets(stack.Pop(), r) {
-				return false, nil
-			}
+		} else if !matchingBrackets(stack.Pop(), r) {
+			return false, nil
 		}
 	}
 
