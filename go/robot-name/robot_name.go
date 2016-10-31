@@ -3,7 +3,11 @@ package robotname
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
+
+// seeded random source (time-based)
+var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 // Robot ..
 type Robot struct {
@@ -12,9 +16,9 @@ type Robot struct {
 
 func (r *Robot) generateName() {
 	var name string
-	name += string('A' + rand.Intn(26))
-	name += string('A' + rand.Intn(26))
-	name += fmt.Sprintf("%03d", rand.Intn(100))
+	name += string('A' + rng.Intn(26))
+	name += string('A' + rng.Intn(26))
+	name += fmt.Sprintf("%03d", rng.Intn(999))
 	r.name = name
 }
 
@@ -30,4 +34,8 @@ func (r *Robot) Name() string {
 // Reset ..
 func (r *Robot) Reset() {
 	r.name = ""
+}
+
+func init() {
+
 }
