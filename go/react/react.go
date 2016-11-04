@@ -25,6 +25,14 @@ func (i *inputCell) addComputeCell(cc *computeCell) {
 	i.computeCells = append(i.computeCells, cc)
 }
 
+func addComputeCell(c Cell, cc *computeCell) {
+	if cx, ok := c.(*computeCell); ok {
+		cx.addComputeCell(cc)
+	} else if ic, ok := c.(*inputCell); ok {
+		ic.addComputeCell(cc)
+	}
+}
+
 type computeCell struct {
 	inputCell
 	calcValue func() int
@@ -37,11 +45,7 @@ func (cc *computeCell) Value() int {
 
 func (cc *computeCell) Update() {
 	if newValue := cc.Value(); newValue != cc.value {
-		cc.value = newValue
-
-		for _, c := range cc.computeCells {
-			c.Update()
-		}
+		cc.SetValue(newValue)
 
 		for _, cb := range cc.callbacks {
 			cb(newValue)
@@ -50,9 +54,8 @@ func (cc *computeCell) Update() {
 }
 
 func (cc *computeCell) AddCallback(f func(int)) CallbackHandle {
-	cbh := &f
-	cc.callbacks[cbh] = f
-	return cbh
+	cc.callbacks[&f] = f
+	return &f
 }
 
 func (cc *computeCell) RemoveCallback(cb CallbackHandle) {
@@ -60,6 +63,11 @@ func (cc *computeCell) RemoveCallback(cb CallbackHandle) {
 }
 
 // -- Reactor Methods ---------------------------------------------------------
+
+// New ..
+func New() Reactor {
+	return &CellReactor{}
+}
 
 // CellReactor ..
 type CellReactor struct{}
@@ -71,48 +79,23 @@ func (r *CellReactor) CreateInput(value int) InputCell {
 
 // CreateCompute1 ..
 func (r *CellReactor) CreateCompute1(c Cell, f func(int) int) ComputeCell {
-	cc := computeCell{callbacks: make(map[CallbackHandle]func(int))}
-
-	if cx, ok := c.(*computeCell); ok {
-		cx.addComputeCell(&cc)
-	} else if ic, ok := c.(*inputCell); ok {
-		ic.addComputeCell(&cc)
+	cc := computeCell{
+		callbacks: make(map[CallbackHandle]func(int)),
+		calcValue: func() int { return f(c.Value()) },
 	}
-
 	cc.value = f(c.Value())
-	cc.calcValue = func() int {
-		return f(c.Value())
-	}
-
+	addComputeCell(c, &cc)
 	return &cc
 }
 
 // CreateCompute2 ..
 func (r *CellReactor) CreateCompute2(c1 Cell, c2 Cell, f func(int, int) int) ComputeCell {
-	cc := computeCell{callbacks: make(map[CallbackHandle]func(int))}
-
-	if cx, ok := c1.(*computeCell); ok {
-		cx.addComputeCell(&cc)
-	} else if ic, ok := c1.(*inputCell); ok {
-		ic.addComputeCell(&cc)
+	cc := computeCell{
+		callbacks: make(map[CallbackHandle]func(int)),
+		calcValue: func() int { return f(c1.Value(), c2.Value()) },
 	}
-	if cx, ok := c2.(*computeCell); ok {
-		cx.addComputeCell(&cc)
-	} else if ic, ok := c2.(*inputCell); ok {
-		ic.addComputeCell(&cc)
-	}
-
 	cc.value = f(c1.Value(), c2.Value())
-	cc.calcValue = func() int {
-		return f(c1.Value(), c2.Value())
-	}
-
+	addComputeCell(c1, &cc)
+	addComputeCell(c2, &cc)
 	return &cc
-}
-
-// -- New ---------------------------------------------------------------------
-
-// New ..
-func New() Reactor {
-	return &CellReactor{}
 }
