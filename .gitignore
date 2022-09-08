@@ -2,5 +2,9 @@
 project
 target
 *.iml
-fsharp/**/bin/
-fsharp/**/obj/
+fsharp/*/bin
+fsharp/*/obj
+HELP.md
+HINTS.md
+**/.exercism
+**/.config
